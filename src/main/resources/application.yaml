@@ -1,0 +1,6 @@
+ktor:
+    application:
+        modules:
+            - com.blackcube.ApplicationKt.module
+    deployment:
+        port: 8080
