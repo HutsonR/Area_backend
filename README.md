@@ -1,21 +1,52 @@
-# Area
+# Area Backend
 
-Here are some useful links to get you started:
+Проект представляет собой backend-сервис, написанный на Kotlin с использованием Ktor. Он предоставляет REST API для работы с турами, местами и историями. Для доступа к базе данных используется Exposed, таблицы определены через UUIDTable, а миграции – Flyway (или ручное управление через SQL).  
 
-- [Ktor Documentation](https://ktor.io/docs/home.html)
-- [Ktor GitHub page](https://github.com/ktorio/ktor)
-- The [Ktor Slack chat](https://app.slack.com/client/T09229ZC6/C0A974TJ9). You'll need to [request an invite](https://surveys.jetbrains.com/s3/kotlin-slack-sign-up) to join.
+---
 
-## Features
+- **API Endpoints:**  
+  - **GET /tours** — получить список туров (опционально с параметром `limit`).  
+  - **GET /tours/{id}** — получить детальную информацию о туре, включая связанные истории.  
+  - **PUT /tours/{id}** — обновить тур, включая синхронизацию историй (обновление, добавление, удаление).
 
-Here's a list of features included in this project:
+- **База данных:**  
+  Используется PostgreSQL. Таблицы создаются через Exposed:  
+  - `tours` (таблица туров)  
+  - `histories` (истории, с внешним ключом на `tours`)  
+  - `places` (достопримечательности)  
+  Подключение настраивается через YAML-конфиг (см. ниже).
 
-| Name                                                                   | Description                                                                        |
-| ------------------------------------------------------------------------|------------------------------------------------------------------------------------ |
-| [Content Negotiation](https://start.ktor.io/p/content-negotiation)     | Provides automatic content conversion according to Content-Type and Accept headers |
-| [Routing](https://start.ktor.io/p/routing)                             | Provides a structured routing DSL                                                  |
-| [kotlinx.serialization](https://start.ktor.io/p/kotlinx-serialization) | Handles JSON serialization using kotlinx.serialization library                     |
-| [HttpsRedirect](https://start.ktor.io/p/https-redirect)                | Redirects insecure HTTP requests to the respective HTTPS endpoint                  |
-| [Postgres](https://start.ktor.io/p/postgres)                           | Adds Postgres database to your application                                         |
+- **Миграции:**  
+  Flyway используется для миграций. Скрипты-модели миграций (например, добавление нового поля) храните в `src/main/resources/db/migration`. При старте вызывается `Flyway.migrate()` и выполняется миграция только для новых скриптов.
 
+- **Асинхронность:**  
+  Операции к БД выполняются в асинхронном режиме через `newSuspendedTransaction` для не блокирующей работы в Ktor.
 
+- **Логирование:**  
+  Логирование организовано с помощью Kotlin Logging.
+
+---
+
+## Структура проекта
+
+```
+AreaBackend/
+├── api/               // Определение HTTP-маршрутов (Ktor routes)
+├── data/
+│   ├── db/           // Таблицы (Exposed) и DatabaseFactory (инициализация базы, миграций)
+│   └── repository/   // Реализации репозиториев: TourRepositoryImpl, PlaceRepositoryImpl
+├── di/               // DI-модули (например, NetworkModule для Retrofit, если требуется)
+├── models/           // Data классы: TourModel, PlaceModel, HistoryModel (kotlinx.serialization)
+├── repository/       // Интерфейсы репозиториев
+└── Application.kt     // Точка входа (Ktor EngineMain)
+```
+
+---
+
+## Зависимости
+
+- [Ktor](https://ktor.io)  
+- [Exposed](https://github.com/JetBrains/Exposed)  
+- PostgreSQL JDBC Driver (`org.postgresql:postgresql`)  
+- Flyway
+- Kotlin Logging (`io.github.microutils:kotlin-logging`)
