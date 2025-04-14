@@ -1,0 +1,2 @@
+ALTER TABLE histories
+ADD COLUMN ordinal_number INTEGER DEFAULT 0;

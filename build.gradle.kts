@@ -26,7 +26,17 @@ dependencies {
     implementation(libs.ktor.server.http.redirect)
     implementation(libs.ktor.server.netty)
     implementation(libs.logback.classic)
+    implementation(libs.kotlin.logging)
     implementation(libs.ktor.server.config.yaml)
+
+    // DB
+    implementation(libs.postgresql)
+    implementation(libs.h2)
+    implementation(libs.exposed.core)
+    implementation(libs.exposed.jdbc)
+    implementation(libs.flyway.core)
+
+    // tests
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
 }
