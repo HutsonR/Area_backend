@@ -1,8 +1,12 @@
-
 [versions]
 kotlin-version = "2.1.20"
 ktor-version = "3.1.2"
 logback-version = "1.4.14"
+postgres-version = "42.7.5"
+h2-version = "2.3.232"
+exposed-version = "0.60.0"
+kotlin-logging = "3.0.5"
+flyway-version = "10.17.3"
 
 [libraries]
 ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor-version" }
@@ -11,9 +15,16 @@ ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx
 ktor-server-http-redirect = { module = "io.ktor:ktor-server-http-redirect", version.ref = "ktor-version" }
 ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor-version" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback-version" }
+kotlin-logging = { module = "io.github.microutils:kotlin-logging-jvm", version.ref = "kotlin-logging" }
 ktor-server-config-yaml = { module = "io.ktor:ktor-server-config-yaml", version.ref = "ktor-version" }
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor-version" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin-version" }
+
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgres-version" }
+h2 = { module = "com.h2database:h2", version.ref = "h2-version" }
+exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed-version" }
+exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed-version" }
+flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway-version" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }

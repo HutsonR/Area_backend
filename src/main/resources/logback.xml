@@ -4,9 +4,16 @@
             <pattern>%d{YYYY-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
+    <logger name="org.eclipse.jetty" level="INFO"/>
+    <logger name="io.netty" level="INFO"/>
+    <!-- Показывать SQL-запросы -->
+    <logger name="org.jetbrains.exposed.sql" level="DEBUG" />
+    <logger name="Exposed" level="DEBUG" />
+
+    <!-- Твой основной логгер -->
+    <logger name="com.blackcube" level="DEBUG" />
+
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
-    <logger name="org.eclipse.jetty" level="INFO"/>
-    <logger name="io.netty" level="INFO"/>
 </configuration>

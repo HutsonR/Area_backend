@@ -1,14 +1,12 @@
 package com.blackcube.api
 
+import com.blackcube.data.repository.PlaceRepository
 import com.blackcube.models.places.PlaceModel
-import com.blackcube.models.tours.TourModel
-import com.blackcube.repository.PlaceRepository
-import com.blackcube.repository.TourRepository
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.*
-import io.ktor.server.request.receive
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.server.application.Application
+import io.ktor.server.response.respond
+import io.ktor.server.routing.get
+import io.ktor.server.routing.routing
 
 fun Application.registerPlaceRoutes(repository: PlaceRepository) {
     routing {

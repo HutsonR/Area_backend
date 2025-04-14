@@ -16,5 +16,6 @@ Here's a list of features included in this project:
 | [Routing](https://start.ktor.io/p/routing)                             | Provides a structured routing DSL                                                  |
 | [kotlinx.serialization](https://start.ktor.io/p/kotlinx-serialization) | Handles JSON serialization using kotlinx.serialization library                     |
 | [HttpsRedirect](https://start.ktor.io/p/https-redirect)                | Redirects insecure HTTP requests to the respective HTTPS endpoint                  |
+| [Postgres](https://start.ktor.io/p/postgres)                           | Adds Postgres database to your application                                         |
 
 
