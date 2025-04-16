@@ -4,8 +4,4 @@ ktor:
             - com.blackcube.ApplicationKt.module
     deployment:
         port: 8080
-
-postgres:
-    url: "jdbc:postgresql://localhost:5433/area"
-    user: "postgres"
-    password: "QHTKUTxr563"
+        host: "0.0.0.0"

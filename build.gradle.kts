@@ -25,6 +25,14 @@ dependencies {
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.server.http.redirect)
     implementation(libs.ktor.server.netty)
+
+    // Client (http request)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.ktor.client.negotiation)
+
     implementation(libs.logback.classic)
     implementation(libs.kotlin.logging)
     implementation(libs.ktor.server.config.yaml)
@@ -35,6 +43,9 @@ dependencies {
     implementation(libs.exposed.core)
     implementation(libs.exposed.jdbc)
     implementation(libs.flyway.core)
+
+    // ENV
+    implementation(libs.dotenv)
 
     // tests
     testImplementation(libs.ktor.server.test.host)

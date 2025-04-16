@@ -3,6 +3,7 @@ package com.blackcube.data.db
 import com.blackcube.data.db.tables.HistoriesTable
 import com.blackcube.data.db.tables.PlacesTable
 import com.blackcube.data.db.tables.ToursTable
+import io.github.cdimascio.dotenv.dotenv
 import io.ktor.server.application.ApplicationEnvironment
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -11,9 +12,10 @@ import org.jetbrains.exposed.sql.transactions.transaction
 object DatabaseFactory {
 
     fun init(environment: ApplicationEnvironment) {
-        val url = environment.config.property("postgres.url").getString()
-        val user = environment.config.property("postgres.user").getString()
-        val password = environment.config.property("postgres.password").getString()
+        val env = dotenv()
+        val url = env["DB_URL"] ?: error("DB_URL не задан в .env")
+        val user = env["DB_USER"] ?: error("DB_USER не задан в .env")
+        val password = env["DB_PASSWORD"] ?: error("DB_PASSWORD не задан в .env")
 
         connectToPostgres(environment, url, user, password)
 
