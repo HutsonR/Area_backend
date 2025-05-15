@@ -1,4 +1,4 @@
-package com.blackcube.utils
+package com.blackcube.utils.configure
 
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application

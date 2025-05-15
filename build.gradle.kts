@@ -42,10 +42,18 @@ dependencies {
     implementation(libs.h2)
     implementation(libs.exposed.core)
     implementation(libs.exposed.jdbc)
+    implementation(libs.exposed.datetime)
     implementation(libs.flyway.core)
 
     // ENV
     implementation(libs.dotenv)
+
+    // HASH
+    implementation(libs.bcrypt)
+
+    // JWT
+    implementation(libs.ktor.server.auth)
+    implementation(libs.ktor.server.auth.jwt)
 
     // tests
     testImplementation(libs.ktor.server.test.host)

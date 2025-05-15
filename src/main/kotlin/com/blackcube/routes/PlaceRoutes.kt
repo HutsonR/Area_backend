@@ -3,21 +3,21 @@ package com.blackcube.routes
 import com.blackcube.data.repository.PlaceRepository
 import com.blackcube.models.places.PlaceModel
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.Application
 import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
-import io.ktor.server.routing.routing
+import io.ktor.server.routing.route
 
-fun Application.registerPlaceRoutes(repository: PlaceRepository) {
-    routing {
-        get("/places") {
+fun Route.registerPlaceRoutes(repository: PlaceRepository) {
+    route("/places") {
+        get {
             val limit = call.request.queryParameters["limit"]?.toIntOrNull()
             val tours: List<PlaceModel> =
                 if (limit != null) repository.getPlaces(limit) else repository.getPlaces()
             call.respond(tours)
         }
 
-        get("/places/{id}") {
+        get("{id}") {
             val id = call.parameters["id"]
             if (id.isNullOrBlank()) {
                 call.respond(HttpStatusCode.BadRequest, "Missing or invalid id")

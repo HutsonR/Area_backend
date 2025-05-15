@@ -8,6 +8,7 @@ exposed-version = "0.60.0"
 kotlin-logging = "3.0.5"
 flyway-version = "10.17.3"
 dotenv-version = "6.5.1"
+bcrypt = "0.10.2"
 
 [libraries]
 ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor-version" }
@@ -30,9 +31,16 @@ postgresql = { module = "org.postgresql:postgresql", version.ref = "postgres-ver
 h2 = { module = "com.h2database:h2", version.ref = "h2-version" }
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed-version" }
 exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed-version" }
+exposed-datetime = { module = "org.jetbrains.exposed:exposed-kotlin-datetime", version.ref = "exposed-version" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway-version" }
 
 dotenv = { module = "io.github.cdimascio:dotenv-kotlin", version.ref = "dotenv-version" }
+
+# jwt
+ktor-server-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor-version" }
+ktor-server-auth-jwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor-version" }
+
+bcrypt = { module = "at.favre.lib:bcrypt", version.ref = "bcrypt" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }

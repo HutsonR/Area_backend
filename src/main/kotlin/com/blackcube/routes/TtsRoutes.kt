@@ -4,19 +4,19 @@ import com.blackcube.data.repository.TtsRepository
 import io.github.cdimascio.dotenv.dotenv
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.Application
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondBytes
+import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
-import io.ktor.server.routing.routing
+import io.ktor.server.routing.route
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
-fun Application.registerTtsRoutes(repository: TtsRepository) {
-    routing {
-        post("/tts") {
+fun Route.registerTtsRoutes(repository: TtsRepository) {
+    route("/tts") {
+        post {
             val env = dotenv()
             val ttsAuthKey = env["TTS_AUTH_KEY"] ?: error("TTS_AUTH_KEY не задан в .env")
             val ttsRequest = call.receive<String>()

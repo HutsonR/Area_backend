@@ -3,6 +3,7 @@ package com.blackcube.data.db
 import com.blackcube.data.db.tables.HistoriesTable
 import com.blackcube.data.db.tables.PlacesTable
 import com.blackcube.data.db.tables.ToursTable
+import com.blackcube.data.db.tables.UsersTable
 import io.github.cdimascio.dotenv.dotenv
 import io.ktor.server.application.ApplicationEnvironment
 import org.jetbrains.exposed.sql.Database
@@ -20,7 +21,12 @@ object DatabaseFactory {
         connectToPostgres(environment, url, user, password)
 
         transaction {
-            SchemaUtils.create(ToursTable, HistoriesTable, PlacesTable)
+            SchemaUtils.create(
+                ToursTable,
+                HistoriesTable,
+                PlacesTable,
+                UsersTable
+            )
         }
     }
 
