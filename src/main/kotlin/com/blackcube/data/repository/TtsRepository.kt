@@ -19,12 +19,7 @@ import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import mu.KotlinLogging
-import java.io.InputStream
-import java.security.KeyStore
-import java.security.cert.CertificateFactory
 import java.util.UUID
-import javax.net.ssl.TrustManagerFactory
-import javax.net.ssl.X509TrustManager
 
 private val logger = KotlinLogging.logger {}
 
@@ -84,37 +79,6 @@ class TtsRepositoryImpl : TtsRepository {
             return null
         } finally {
             client.close()
-        }
-    }
-
-    private fun createHttpClientWithCustomCert(): HttpClient {
-        // Загружаем сертификат из ресурсов (например, /russiantrustedca.crt)
-        val certInputStream: InputStream =
-            object {}.javaClass.getResourceAsStream("/russiantrustedca.crt")
-                ?: throw RuntimeException("Certificate file not found in resources")
-
-        val certificateFactory = CertificateFactory.getInstance("X.509")
-        val caCert = certificateFactory.generateCertificate(certInputStream)
-        certInputStream.close()
-
-        // Создаём пустой KeyStore и добавляем наш сертификат в него
-        val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
-        keyStore.load(null, null)
-        keyStore.setCertificateEntry("russiantrusted", caCert)
-
-        // Инициализируем TrustManagerFactory с нашим KeyStore
-        val tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
-        tmf.init(keyStore)
-        val trustManagers = tmf.trustManagers
-        val x509TrustManager = trustManagers.first { it is X509TrustManager } as X509TrustManager
-
-        // Создаем HttpClient с использованием CIO-движка и кастомного trustManager
-        return HttpClient(CIO) {
-            engine {
-                https {
-                    trustManager = x509TrustManager
-                }
-            }
         }
     }
 }

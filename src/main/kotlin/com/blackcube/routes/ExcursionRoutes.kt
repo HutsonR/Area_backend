@@ -3,23 +3,23 @@ package com.blackcube.routes
 import com.blackcube.data.repository.TourRepository
 import com.blackcube.models.tours.TourModel
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.Application
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.put
-import io.ktor.server.routing.routing
+import io.ktor.server.routing.route
 
-fun Application.registerExcursionRoutes(repository: TourRepository) {
-    routing {
-        get("/tours") {
+fun Route.registerExcursionRoutes(repository: TourRepository) {
+    route("/tours") {
+        get {
             val limit = call.request.queryParameters["limit"]?.toIntOrNull()
             val tours: List<TourModel> =
                 if (limit != null) repository.getTours(limit) else repository.getTours()
             call.respond(tours)
         }
 
-        get("/tours/{id}") {
+        get("{id}") {
             val id = call.parameters["id"]
             if (id.isNullOrBlank()) {
                 call.respond(HttpStatusCode.BadRequest, "Missing or invalid id")
@@ -33,7 +33,7 @@ fun Application.registerExcursionRoutes(repository: TourRepository) {
             }
         }
 
-        put("/tours/{id}") {
+        put("{id}") {
             val id = call.parameters["id"]
             if (id.isNullOrBlank()) {
                 call.respond(HttpStatusCode.BadRequest, "Missing or invalid id")
