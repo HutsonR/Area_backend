@@ -3,7 +3,7 @@ package com.blackcube.data.service
 import com.blackcube.data.models.auth.LoginRequest
 import com.blackcube.data.models.auth.RegistrationRequest
 import com.blackcube.data.repository.UserRepository
-import com.blackcube.data.util.PasswordHasher
+import com.blackcube.data.utils.PasswordHasher
 import com.blackcube.models.auth.UserModel
 import com.blackcube.utils.JwtConfig
 
