@@ -1,4 +1,4 @@
-package com.blackcube.data.util
+package com.blackcube.data.utils
 
 import at.favre.lib.crypto.bcrypt.BCrypt
 

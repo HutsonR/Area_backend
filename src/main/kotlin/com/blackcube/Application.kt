@@ -7,11 +7,13 @@ import com.blackcube.data.repository.TtsRepositoryImpl
 import com.blackcube.data.repository.UserRepositoryImpl
 import com.blackcube.data.service.AuthService
 import com.blackcube.routes.registerAuthRoutes
+import com.blackcube.routes.registerEncryptionRoutes
 import com.blackcube.routes.registerExcursionRoutes
 import com.blackcube.routes.registerPlaceRoutes
 import com.blackcube.routes.registerTtsRoutes
 import com.blackcube.utils.configure.configureAuthorization
 import com.blackcube.utils.configure.configureSerialization
+import com.blackcube.utils.encryption.RSAKeyProvider
 import com.blackcube.utils.secure
 import io.ktor.server.application.Application
 import io.ktor.server.routing.routing
@@ -22,6 +24,8 @@ fun main(args: Array<String>) {
 
 fun Application.module() {
     DatabaseFactory.init(environment = environment)
+
+    RSAKeyProvider.init()
 
     configureSerialization()
     configureHTTP()
@@ -34,6 +38,7 @@ fun Application.module() {
     val ttsRepository = TtsRepositoryImpl()
 
     routing {
+        registerEncryptionRoutes()
         registerAuthRoutes(authService)
         secure {
             registerExcursionRoutes(excursionRepository)
