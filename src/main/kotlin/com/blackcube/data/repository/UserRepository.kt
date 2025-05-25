@@ -1,7 +1,7 @@
 package com.blackcube.data.repository
 
 import com.blackcube.data.db.tables.UsersTable
-import com.blackcube.models.auth.UserModel
+import com.blackcube.models.user.UserModel
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll

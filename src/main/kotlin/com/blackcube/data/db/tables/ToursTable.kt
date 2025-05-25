@@ -8,7 +8,5 @@ object ToursTable : UUIDTable("tours") {
     val description = text("description")
     val duration = varchar("duration", 50)
     val distance = varchar("distance", 50)
-    val isCompleted = bool("is_completed")
-    val isStarted = bool("is_started")
     val isAR = bool("isAR")
 }

@@ -3,8 +3,12 @@ package com.blackcube.utils
 import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
-import com.blackcube.models.auth.UserModel
+import com.blackcube.data.service.AuthenticationException
+import com.blackcube.models.user.UserModel
 import io.github.cdimascio.dotenv.dotenv
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
 import java.util.Date
 
 object JwtConfig {
@@ -36,4 +40,11 @@ object JwtConfig {
     }
 
     fun getRealm(): String = realm
+
+    fun ApplicationCall.currentUserId(): String {
+        val principal = principal<JWTPrincipal>()
+            ?: throw AuthenticationException("Missing or invalid JWT")
+        return principal.payload.getClaim("userId").asString()
+    }
+
 }

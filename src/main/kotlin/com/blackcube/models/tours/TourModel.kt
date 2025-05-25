@@ -15,6 +15,7 @@ import kotlinx.serialization.Serializable
  * @property isStarted Флаг, указывающий, начат ли тур
  * @property isAR Флаг, указывающий, поддерживает ли тур дополненную реальность (AR)
  * @property histories Список историй, связанных с туром
+ * @property arObjects Список AR объектов, связанных с туром
  */
 @Serializable
 data class TourModel(
@@ -24,8 +25,9 @@ data class TourModel(
     val description: String,
     val duration: String,
     val distance: String,
-    val isCompleted: Boolean,
     val isStarted: Boolean,
+    val isCompleted: Boolean,
     val isAR: Boolean,
-    val histories: List<HistoryModel>
+    val histories: List<HistoryModel>,
+    val arObjects: List<ArObjectModel>
 )

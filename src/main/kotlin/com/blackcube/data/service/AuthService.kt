@@ -4,7 +4,7 @@ import com.blackcube.data.models.auth.LoginRequest
 import com.blackcube.data.models.auth.RegistrationRequest
 import com.blackcube.data.repository.UserRepository
 import com.blackcube.data.utils.PasswordHasher
-import com.blackcube.models.auth.UserModel
+import com.blackcube.models.user.UserModel
 import com.blackcube.utils.JwtConfig
 
 class AuthService(private val userRepository: UserRepository) {
