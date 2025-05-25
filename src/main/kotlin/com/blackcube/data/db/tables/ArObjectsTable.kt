@@ -2,11 +2,8 @@ package com.blackcube.data.db.tables
 
 import org.jetbrains.exposed.dao.id.UUIDTable
 
-object HistoriesTable : UUIDTable("histories") {
+object ArObjectsTable : UUIDTable("ar_objects") {
     val tourId = reference("tour_id", ToursTable.id)
-    val ordinalNumber = integer("ordinal_number").default(1)
-    val title = varchar("title", 255)
-    val description = text("description")
     val lat = double("lat")
     val lon = double("lon")
 }

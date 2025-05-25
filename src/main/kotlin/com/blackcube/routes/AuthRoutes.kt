@@ -3,7 +3,7 @@ package com.blackcube.routes
 import com.blackcube.data.models.auth.LoginRequest
 import com.blackcube.data.models.auth.RegistrationRequest
 import com.blackcube.data.service.AuthService
-import com.blackcube.models.auth.TokenResponse
+import com.blackcube.models.user.TokenResponse
 import com.blackcube.utils.encryption.RSAKeyProvider
 import com.blackcube.utils.encryption.RsaUtil
 import io.ktor.server.request.receive

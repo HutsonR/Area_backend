@@ -1,4 +1,4 @@
-package com.blackcube.models.auth
+package com.blackcube.models.user
 
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable

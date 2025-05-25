@@ -1,160 +1,170 @@
 package com.blackcube.data.repository
 
+import com.blackcube.data.db.tables.ArObjectsTable
 import com.blackcube.data.db.tables.HistoriesTable
 import com.blackcube.data.db.tables.ToursTable
+import com.blackcube.data.db.tables.user_facts.UserArScansTable
+import com.blackcube.data.db.tables.user_facts.UserHistoryProgressTable
+import com.blackcube.data.db.tables.user_facts.UserToursTable
+import com.blackcube.data.utils.parseUuid
+import com.blackcube.data.utils.parseUuids
+import com.blackcube.models.tours.ArObjectModel
 import com.blackcube.models.tours.HistoryModel
 import com.blackcube.models.tours.TourModel
+import kotlinx.coroutines.Dispatchers
 import mu.KotlinLogging
+import org.jetbrains.exposed.sql.JoinType
+import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.update
-import java.util.UUID
 
 private val logger = KotlinLogging.logger {}
 
 interface TourRepository {
-    suspend fun getTours(limit: Int? = null): List<TourModel>
-    suspend fun getTourById(id: String): TourModel?
-    suspend fun updateTour(id: String, tour: TourModel): Boolean
+    suspend fun getAllTours(userId: String, limit: Int? = null): List<TourModel>
+    suspend fun getTourById(userId: String, tourId: String): TourModel?
+    suspend fun startTour(userId: String, tourId: String): Boolean
+    suspend fun finishTour(userId: String, tourId: String): Boolean
 }
 
 class TourRepositoryImpl : TourRepository {
 
-    override suspend fun getTours(limit: Int?): List<TourModel> = newSuspendedTransaction {
-        val toursQuery = if (limit != null) {
-            ToursTable.selectAll().limit(limit)
-        } else {
-            ToursTable.selectAll()
+    override suspend fun getAllTours(userId: String, limit: Int?): List<TourModel> = newSuspendedTransaction(Dispatchers.IO) {
+        logger.info { "Getting all tours with userId: $userId and limit: $limit" }
+        val userUuid = parseUuid(userId)
+
+        // 2) Готовим JOIN между ToursTable и UserToursTable
+        val toursWithUser = ToursTable.join(
+            UserToursTable,
+            joinType = JoinType.LEFT,
+            additionalConstraint = {
+                (ToursTable.id eq UserToursTable.tourId) and
+                        (UserToursTable.userId eq userUuid)
+            }
+        )
+
+        // 3) Формируем запрос: выбираем конкретные колонки через select(...)
+        var tourQuery: Query = toursWithUser.select(
+            ToursTable.id,
+            ToursTable.imageUrl,
+            ToursTable.title,
+            ToursTable.description,
+            ToursTable.duration,
+            ToursTable.distance,
+            ToursTable.isAR,
+            UserToursTable.startedAt,
+            UserToursTable.finishedAt
+        )
+        // 4) Ограничиваем число строк, если задано
+        if (limit != null) {
+            tourQuery = tourQuery.limit(count = limit).offset(start = 0)
         }
 
-        toursQuery.map { tourRow ->
-            val tourUUID = tourRow[ToursTable.id]
-            val histories = HistoriesTable
-                .selectAll()
-                .where { HistoriesTable.tourId eq tourUUID }
-                .orderBy(HistoriesTable.ordinalNumber to SortOrder.ASC)
-                .map { histRow ->
-                    HistoryModel(
-                        id = histRow[HistoriesTable.id].toString(),
-                        ordinalNumber = histRow[HistoriesTable.ordinalNumber],
-                        title = histRow[HistoriesTable.title],
-                        description = histRow[HistoriesTable.description],
-                        isCompleted = histRow[HistoriesTable.isCompleted],
-                        lat = histRow[HistoriesTable.lat],
-                        lon = histRow[HistoriesTable.lon]
-                    )
+        // 5) Выполняем запрос и собираем результаты
+        val tourRows = tourQuery.toList()
+        val tourIds = tourRows.map { it[ToursTable.id] }
+
+        // 6) Загружаем истории и прогресс пользователя
+        val rawHistories = HistoriesTable
+            .join(
+                UserHistoryProgressTable,
+                joinType = JoinType.LEFT,
+                additionalConstraint = {
+                    (HistoriesTable.id eq UserHistoryProgressTable.historyId) and
+                            (UserHistoryProgressTable.userId eq userUuid)
                 }
+            )
+            .selectAll()
+            .where { HistoriesTable.tourId inList tourIds }
+            .orderBy(HistoriesTable.ordinalNumber to SortOrder.ASC)
+            .map { row ->
+                row[HistoriesTable.tourId] to HistoryModel(
+                    id = row[HistoriesTable.id].toString(),
+                    ordinalNumber = row[HistoriesTable.ordinalNumber],
+                    title = row[HistoriesTable.title],
+                    description = row[HistoriesTable.description],
+                    isCompleted = row.getOrNull(UserHistoryProgressTable.historyId) != null,
+                    lat = row[HistoriesTable.lat],
+                    lon = row[HistoriesTable.lon]
+                )
+            }
+        val historiesByTour = rawHistories.groupBy({ it.first }, { it.second })
+
+        // 7) Загружаем AR-объекты и сканы пользователя
+        val rawArObjects = ArObjectsTable
+            .join(
+                UserArScansTable,
+                joinType = JoinType.LEFT,
+                additionalConstraint = {
+                    (ArObjectsTable.id eq UserArScansTable.arObjectId) and
+                            (UserArScansTable.userId eq userUuid)
+                }
+            )
+            .selectAll()
+            .where { ArObjectsTable.tourId inList tourIds }
+            .map { row ->
+                row[ArObjectsTable.tourId] to ArObjectModel(
+                    id = row[ArObjectsTable.id].toString(),
+                    lat = row[ArObjectsTable.lat],
+                    lon = row[ArObjectsTable.lon],
+                    isScanned = row.getOrNull(UserArScansTable.arObjectId) != null
+                )
+            }
+        val arByTour = rawArObjects.groupBy({ it.first }, { it.second })
+
+        // 8) Собираем финальный список TourModel
+        tourRows.map { row ->
+            val tId = row[ToursTable.id]
+            val startedAt = row.getOrNull(UserToursTable.startedAt)
+            val finishedAt = row.getOrNull(UserToursTable.finishedAt)
 
             TourModel(
-                id = tourUUID.toString(),
-                imageUrl = tourRow[ToursTable.imageUrl],
-                title = tourRow[ToursTable.title],
-                description = tourRow[ToursTable.description],
-                duration = tourRow[ToursTable.duration],
-                distance = tourRow[ToursTable.distance],
-                isCompleted = tourRow[ToursTable.isCompleted],
-                isStarted = tourRow[ToursTable.isStarted],
-                isAR = tourRow[ToursTable.isAR],
-                histories = histories
+                id = tId.toString(),
+                imageUrl = row[ToursTable.imageUrl],
+                title = row[ToursTable.title],
+                description = row[ToursTable.description],
+                duration = row[ToursTable.duration],
+                distance = row[ToursTable.distance],
+                isStarted = startedAt != null,
+                isCompleted = finishedAt != null,
+                isAR = row[ToursTable.isAR],
+                histories = historiesByTour[tId].orEmpty(),
+                arObjects = arByTour[tId].orEmpty()
             )
         }
     }
 
-    override suspend fun getTourById(id: String): TourModel? = newSuspendedTransaction {
-        val tourUUID = try {
-            UUID.fromString(id)
-        } catch (e: Exception) {
-            logger.error(e) { "Invalid UUID format for id: $id" }
-            return@newSuspendedTransaction null
-        }
-        logger.info { "Fetching tour with id: $tourUUID" }
-        val tourRow = ToursTable
-            .selectAll()
-            .where { ToursTable.id eq tourUUID }
-            .singleOrNull()
-        if (tourRow == null) {
-            logger.info { "Tour with id $tourUUID not found" }
-            return@newSuspendedTransaction null
-        }
-        val histories = HistoriesTable
-            .selectAll()
-            .where { HistoriesTable.tourId eq tourUUID }
-            .orderBy(HistoriesTable.ordinalNumber to SortOrder.ASC)
-            .map { histRow ->
-                HistoryModel(
-                    id = histRow[HistoriesTable.id].toString(),
-                    ordinalNumber = histRow[HistoriesTable.ordinalNumber],
-                    title = histRow[HistoriesTable.title],
-                    description = histRow[HistoriesTable.description],
-                    isCompleted = histRow[HistoriesTable.isCompleted],
-                    lat = histRow[HistoriesTable.lat],
-                    lon = histRow[HistoriesTable.lon]
-                )
-            }
-        TourModel(
-            id = tourUUID.toString(),
-            imageUrl = tourRow[ToursTable.imageUrl],
-            title = tourRow[ToursTable.title],
-            description = tourRow[ToursTable.description],
-            duration = tourRow[ToursTable.duration],
-            distance = tourRow[ToursTable.distance],
-            isCompleted = tourRow[ToursTable.isCompleted],
-            isStarted = tourRow[ToursTable.isStarted],
-            isAR = tourRow[ToursTable.isAR],
-            histories = histories
-        )
+    override suspend fun getTourById(userId: String, tourId: String): TourModel? = newSuspendedTransaction(Dispatchers.IO) {
+        logger.info { "Fetching tour with id: $tourId" }
+        getAllTours(userId).find { it.id == tourId }
     }
 
-    override suspend fun updateTour(id: String, tour: TourModel): Boolean = newSuspendedTransaction {
-        val tourUUID = try {
-            UUID.fromString(id)
-        } catch (e: Exception) {
-            logger.error(e) { "Invalid UUID format for update, id: $id" }
-            return@newSuspendedTransaction false
-        }
-        logger.info { "Updating tour with id: $tourUUID" }
-        val updatedCount = ToursTable.update({ ToursTable.id eq tourUUID }) {
-            it[imageUrl] = tour.imageUrl
-            it[title] = tour.title
-            it[description] = tour.description
-            it[duration] = tour.duration
-            it[distance] = tour.distance
-            it[isCompleted] = tour.isCompleted
-            it[isStarted] = tour.isStarted
-            it[isAR] = tour.isAR
-        }
+    override suspend fun startTour(userId: String, tourId: String): Boolean = newSuspendedTransaction(Dispatchers.IO) {
+        logger.info { "Starting tour with id: $tourId" }
+        val (userUuid, tourUuid) = parseUuids(listOf(userId, tourId))
+            ?: return@newSuspendedTransaction false
 
-        if (updatedCount <= 0) {
-            logger.info { "Tour not found for id: $tourUUID" }
-            return@newSuspendedTransaction false
+        val insertResult = UserToursTable.insertIgnore {
+            it[UserToursTable.userId] = userUuid
+            it[UserToursTable.tourId] = tourUuid
         }
+        insertResult.insertedCount > 0
+    }
 
-        val existingHistoryIds = HistoriesTable
-            .selectAll()
-            .where { HistoriesTable.tourId eq tourUUID }
-            .map { it[HistoriesTable.id].toString() }
-            .toSet()
+    override suspend fun finishTour(userId: String, tourId: String): Boolean = newSuspendedTransaction(Dispatchers.IO) {
+        logger.info { "Finishing tour with id: $tourId" }
+        val (userUuid, tourUuid) = parseUuids(listOf(userId, tourId))
+            ?: return@newSuspendedTransaction false
 
-        tour.histories.forEach { history ->
-            val historyId = try {
-                UUID.fromString(history.id)
-            } catch (e: Exception) {
-                logger.error(e) { "Invalid UUID format for update, historyId: ${history.id}" }
-                return@newSuspendedTransaction false
-            }
-            if (existingHistoryIds.contains(historyId.toString())) {
-                HistoriesTable.update({ HistoriesTable.id eq historyId }) {
-                    it[title] = history.title
-                    it[description] = history.description
-                    it[isCompleted] = history.isCompleted
-                    it[lat] = history.lat
-                    it[lon] = history.lon
-                }
-            }
+        val updateResult = UserToursTable.update({
+            (UserToursTable.userId eq userUuid) and (UserToursTable.tourId eq tourUuid)
+        }) {
+            it[finishedAt] = org.jetbrains.exposed.sql.kotlin.datetime.CurrentDateTime
         }
-
-        logger.info { "Updated tour and its histories for id $tourUUID" }
-        true
+        updateResult > 0
     }
 }

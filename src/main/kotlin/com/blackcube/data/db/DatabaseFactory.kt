@@ -1,9 +1,14 @@
 package com.blackcube.data.db
 
+import com.blackcube.data.db.tables.ArObjectsTable
 import com.blackcube.data.db.tables.HistoriesTable
 import com.blackcube.data.db.tables.PlacesTable
 import com.blackcube.data.db.tables.ToursTable
 import com.blackcube.data.db.tables.UsersTable
+import com.blackcube.data.db.tables.user_facts.UserArScansTable
+import com.blackcube.data.db.tables.user_facts.UserHistoryProgressTable
+import com.blackcube.data.db.tables.user_facts.UserStatsTable
+import com.blackcube.data.db.tables.user_facts.UserToursTable
 import io.github.cdimascio.dotenv.dotenv
 import io.ktor.server.application.ApplicationEnvironment
 import org.jetbrains.exposed.sql.Database
@@ -25,7 +30,12 @@ object DatabaseFactory {
                 ToursTable,
                 HistoriesTable,
                 PlacesTable,
-                UsersTable
+                UsersTable,
+                ArObjectsTable,
+                UserToursTable,
+                UserHistoryProgressTable,
+                UserArScansTable,
+                UserStatsTable
             )
         }
     }
