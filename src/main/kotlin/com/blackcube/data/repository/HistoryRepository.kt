@@ -1,13 +1,11 @@
 package com.blackcube.data.repository
 
 import com.blackcube.data.db.tables.user_facts.UserHistoryProgressTable
+import com.blackcube.data.utils.parseUuids
+import com.blackcube.utils.LoggerUtil
 import kotlinx.coroutines.Dispatchers
-import mu.KotlinLogging
 import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import java.util.UUID
-
-private val logger = KotlinLogging.logger {}
 
 interface HistoryRepository {
     suspend fun completeHistory(userId: String, historyId: String): Boolean
@@ -15,22 +13,13 @@ interface HistoryRepository {
 
 class HistoryRepositoryImpl : HistoryRepository {
     override suspend fun completeHistory(userId: String, historyId: String) = newSuspendedTransaction(Dispatchers.IO) {
-        logger.info { "Completing history with historyId: $historyId" }
-        val userUUID = try {
-            UUID.fromString(userId)
-        } catch (e: Exception) {
-            logger.error(e) { "Invalid UUID format for id: $userId" }
-            return@newSuspendedTransaction false
-        }
-        val historyUUID = try {
-            UUID.fromString(historyId)
-        } catch (e: Exception) {
-            logger.error(e) { "Invalid UUID format for id: $historyId" }
-            return@newSuspendedTransaction false
-        }
+        LoggerUtil.log("Completing history with historyId: $historyId")
+        val (userUuid, historyUuid) = parseUuids(listOf(userId, historyId))
+            ?: return@newSuspendedTransaction false
+
         val insertResult = UserHistoryProgressTable.insertIgnore {
-            it[UserHistoryProgressTable.userId] = userUUID
-            it[UserHistoryProgressTable.historyId] = historyUUID
+            it[UserHistoryProgressTable.userId] = userUuid
+            it[UserHistoryProgressTable.historyId] = historyUuid
         }
         insertResult.insertedCount > 0
     }

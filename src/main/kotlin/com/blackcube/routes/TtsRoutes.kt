@@ -1,6 +1,7 @@
 package com.blackcube.routes
 
 import com.blackcube.data.repository.TtsRepository
+import com.blackcube.utils.LoggerUtil
 import io.github.cdimascio.dotenv.dotenv
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -10,9 +11,6 @@ import io.ktor.server.response.respondBytes
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import mu.KotlinLogging
-
-private val logger = KotlinLogging.logger {}
 
 fun Route.registerTtsRoutes(repository: TtsRepository) {
     route("/tts") {
@@ -20,7 +18,7 @@ fun Route.registerTtsRoutes(repository: TtsRepository) {
             val env = dotenv()
             val ttsAuthKey = env["TTS_AUTH_KEY"] ?: error("TTS_AUTH_KEY не задан в .env")
             val ttsRequest = call.receive<String>()
-            logger.info { "Received TTS request: ${ttsRequest.take(30)}..." }
+            LoggerUtil.log("Received TTS request: ${ttsRequest.take(30)}...")
 
             val audioBytes = repository.convertTextToSpeech(ttsAuthKey, ttsRequest)
             if (audioBytes != null) {
