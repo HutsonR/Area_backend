@@ -11,8 +11,8 @@ import com.blackcube.data.utils.parseUuids
 import com.blackcube.models.tours.ArObjectModel
 import com.blackcube.models.tours.HistoryModel
 import com.blackcube.models.tours.TourModel
+import com.blackcube.utils.LoggerUtil
 import kotlinx.coroutines.Dispatchers
-import mu.KotlinLogging
 import org.jetbrains.exposed.sql.JoinType
 import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.SortOrder
@@ -21,8 +21,6 @@ import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.update
-
-private val logger = KotlinLogging.logger {}
 
 interface TourRepository {
     suspend fun getAllTours(userId: String, limit: Int? = null): List<TourModel>
@@ -34,7 +32,7 @@ interface TourRepository {
 class TourRepositoryImpl : TourRepository {
 
     override suspend fun getAllTours(userId: String, limit: Int?): List<TourModel> = newSuspendedTransaction(Dispatchers.IO) {
-        logger.info { "Getting all tours with userId: $userId and limit: $limit" }
+        LoggerUtil.log("Getting all tours with userId: $userId and limit: $limit")
         val userUuid = parseUuid(userId)
 
         // 2) Готовим JOIN между ToursTable и UserToursTable
@@ -139,12 +137,12 @@ class TourRepositoryImpl : TourRepository {
     }
 
     override suspend fun getTourById(userId: String, tourId: String): TourModel? = newSuspendedTransaction(Dispatchers.IO) {
-        logger.info { "Fetching tour with id: $tourId" }
+        LoggerUtil.log("Fetching tour for user $userId with tour id: $tourId")
         getAllTours(userId).find { it.id == tourId }
     }
 
     override suspend fun startTour(userId: String, tourId: String): Boolean = newSuspendedTransaction(Dispatchers.IO) {
-        logger.info { "Starting tour with id: $tourId" }
+        LoggerUtil.log("Starting tour for user $userId with tour id: $tourId")
         val (userUuid, tourUuid) = parseUuids(listOf(userId, tourId))
             ?: return@newSuspendedTransaction false
 
@@ -156,7 +154,7 @@ class TourRepositoryImpl : TourRepository {
     }
 
     override suspend fun finishTour(userId: String, tourId: String): Boolean = newSuspendedTransaction(Dispatchers.IO) {
-        logger.info { "Finishing tour with id: $tourId" }
+        LoggerUtil.log("Finishing tour for user $userId with tour id: $tourId")
         val (userUuid, tourUuid) = parseUuids(listOf(userId, tourId))
             ?: return@newSuspendedTransaction false
 

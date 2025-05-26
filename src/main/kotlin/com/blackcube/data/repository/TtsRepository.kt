@@ -1,6 +1,7 @@
 package com.blackcube.data.repository
 
 import com.blackcube.models.tts.TokenResponse
+import com.blackcube.utils.LoggerUtil
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
@@ -18,10 +19,7 @@ import io.ktor.http.Parameters
 import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
-import mu.KotlinLogging
 import java.util.UUID
-
-private val logger = KotlinLogging.logger {}
 
 interface TtsRepository {
     suspend fun convertTextToSpeech(ttsAuthKey: String, text: String): ByteArray?
@@ -56,7 +54,7 @@ class TtsRepositoryImpl : TtsRepository {
                     }))
                 }.body()
 
-            logger.info { "Token received: ${tokenResponse.accessToken.take(10)}..." }
+            LoggerUtil.log("Token received: ${tokenResponse.accessToken.take(10)}...")
 
             // Синтез речи
             val ttsResponse = client.post("https://smartspeech.sber.ru/rest/v1/text:synthesize") {
@@ -68,14 +66,14 @@ class TtsRepositoryImpl : TtsRepository {
             }
             if (ttsResponse.status.isSuccess()) {
                 val audioBytes = ttsResponse.body<ByteArray>()
-                logger.info { "TTS synthesis succeeded." }
+                LoggerUtil.log("TTS synthesis succeeded.")
                 return audioBytes
             } else {
-                logger.error { "TTS synthesis failed: ${ttsResponse.status}" }
+                LoggerUtil.log("TTS synthesis failed: ${ttsResponse.status}")
                 return null
             }
         } catch (e: Exception) {
-            logger.error(e) { "Error processing TTS for text: ${text.take(30)}..." }
+            LoggerUtil.log("Error processing TTS for text: ${text.take(20)}... with exception: ${e.message}")
             return null
         } finally {
             client.close()
