@@ -47,6 +47,7 @@ class StatsRepositoryImpl : StatsRepository {
         // 3. Сколько людей прошло (без повтора)
         val tourUsersCount = UserToursTable
             .selectAll()
+            .where { UserToursTable.finishedAt.isNotNull() }
             .map { it[UserToursTable.userId] }
             .distinct()
             .count()
