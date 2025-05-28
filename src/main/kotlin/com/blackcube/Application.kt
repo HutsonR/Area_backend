@@ -4,6 +4,7 @@ import com.blackcube.data.db.DatabaseFactory
 import com.blackcube.data.repository.ArRepositoryImpl
 import com.blackcube.data.repository.HistoryRepositoryImpl
 import com.blackcube.data.repository.PlaceRepositoryImpl
+import com.blackcube.data.repository.StatsRepositoryImpl
 import com.blackcube.data.repository.TourRepositoryImpl
 import com.blackcube.data.repository.TtsRepositoryImpl
 import com.blackcube.data.repository.UserRepositoryImpl
@@ -14,6 +15,7 @@ import com.blackcube.routes.registerEncryptionRoutes
 import com.blackcube.routes.registerExcursionRoutes
 import com.blackcube.routes.registerHistoryRoutes
 import com.blackcube.routes.registerPlaceRoutes
+import com.blackcube.routes.registerStatsRoutes
 import com.blackcube.routes.registerTtsRoutes
 import com.blackcube.utils.configure.configureAuthorization
 import com.blackcube.utils.configure.configureSerialization
@@ -42,6 +44,7 @@ fun Application.module() {
     val arRepository = ArRepositoryImpl()
     val placeRepository = PlaceRepositoryImpl()
     val ttsRepository = TtsRepositoryImpl()
+    val statsRepository = StatsRepositoryImpl()
 
     routing {
         registerEncryptionRoutes()
@@ -52,6 +55,7 @@ fun Application.module() {
             registerArRoutes(arRepository)
             registerPlaceRoutes(placeRepository)
             registerTtsRoutes(ttsRepository)
+            registerStatsRoutes(statsRepository)
         }
     }
 }
