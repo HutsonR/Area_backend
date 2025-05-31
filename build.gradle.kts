@@ -55,6 +55,10 @@ dependencies {
     implementation(libs.ktor.server.auth)
     implementation(libs.ktor.server.auth.jwt)
 
+    // HTTPS
+    implementation(libs.ktor.server.http.certificates)
+    implementation(libs.ktor.server.http.redirect)
+
     // tests
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
