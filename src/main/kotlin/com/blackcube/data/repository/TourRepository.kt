@@ -109,6 +109,7 @@ class TourRepositoryImpl : TourRepository {
                     id = row[ArObjectsTable.id].toString(),
                     lat = row[ArObjectsTable.lat],
                     lon = row[ArObjectsTable.lon],
+                    points = row[ArObjectsTable.points],
                     isScanned = row.getOrNull(UserArScansTable.arObjectId) != null
                 )
             }
