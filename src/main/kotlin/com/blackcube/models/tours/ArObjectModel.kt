@@ -7,5 +7,6 @@ data class ArObjectModel(
     val id: String,
     val lat: Double,
     val lon: Double,
+    val text: String?,
     val isScanned: Boolean
 )

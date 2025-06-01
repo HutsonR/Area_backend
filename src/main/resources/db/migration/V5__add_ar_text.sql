@@ -1,0 +1,9 @@
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+CREATE TABLE IF NOT EXISTS ar_objects (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tour_id UUID NOT NULL REFERENCES tours(id),
+  text    TEXT,
+  lat     DOUBLE PRECISION NOT NULL,
+  lon     DOUBLE PRECISION NOT NULL
+);

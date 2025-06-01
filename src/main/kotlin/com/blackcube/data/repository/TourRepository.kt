@@ -109,12 +109,12 @@ class TourRepositoryImpl : TourRepository {
                     id = row[ArObjectsTable.id].toString(),
                     lat = row[ArObjectsTable.lat],
                     lon = row[ArObjectsTable.lon],
+                    text = row[ArObjectsTable.text],
                     isScanned = row.getOrNull(UserArScansTable.arObjectId) != null
                 )
             }
         val arByTour = rawArObjects.groupBy({ it.first }, { it.second })
 
-        // 8) Собираем финальный список TourModel
         tourRows.map { row ->
             val tId = row[ToursTable.id]
             val startedAt = row.getOrNull(UserToursTable.startedAt)
